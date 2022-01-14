@@ -69,3 +69,59 @@ exports.deleteBook = async (req, res) => {
     });
   }
 };
+// UPDATE book status if user authorized
+exports.updateBook = async (req, res) => {
+  if (checkAuth(req, res)) {
+    try {
+      const book = await BookModel.findById(req.params.id);
+      if (!book) {
+        return res.status(404).json({
+          message: "book not found",
+        });
+      }
+      await BookModel.findByIdAndUpdate(req.params.id, req.body);
+      return res.status(200).json({
+        message: "book updated successfully",
+      });
+    } catch (err) {
+      console.log(err);
+      res.status(500).json({
+        message: "server error",
+      });
+    }
+  } else {
+    return res.status(401).json({
+      message: "you are not authorized to update a book",
+    });
+  }
+};
+
+// • Search by bookName or ISSN in the book directory (admin, librarian, assistant)
+
+exports.searchByNameOrISSN = async (req, res) => {
+  if (checkAuth(req, res)) {
+    try {
+      const book = await BookModel.find({
+        $or: [{ BookName: req.body.BookName }, { ISSN: req.body.ISSN }],
+      });
+      if (!book) {
+        return res.status(404).json({
+          message: "book not found",
+        });
+      }
+      return res.status(200).json({
+        message: "book found",
+        data: book,
+      });
+    } catch (err) {
+      console.log(err);
+      res.status(500).json({
+        message: "server error",
+      });
+    }
+  } else {
+    return res.status(401).json({
+      message: "you are not authorized to search a book",
+    });
+  }
+};

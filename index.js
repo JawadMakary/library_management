@@ -8,6 +8,8 @@ DB();
 app.use(express.json());
 app.use("/api/auth",authRouter)
 app.use("/api/book",bookRouter)
+app.use("/api/customer",require("./routes/CustomerRoute"))
+app.use("/api/borrowedbook",require("./routes/BorrowedBookRoute"))
 app.listen(process.env.PORT, () => {
   console.log("listening on port " + process.env.PORT);
 });
