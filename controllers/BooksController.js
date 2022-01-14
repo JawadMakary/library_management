@@ -96,8 +96,6 @@ exports.updateBook = async (req, res) => {
   }
 };
 
-// • Search by bookName or ISSN in the book directory (admin, librarian, assistant)
-
 exports.searchByNameOrISSN = async (req, res) => {
   if (checkAuth(req, res)) {
     try {
@@ -123,5 +121,16 @@ exports.searchByNameOrISSN = async (req, res) => {
     return res.status(401).json({
       message: "you are not authorized to search a book",
     });
+  }
+};
+
+// • Create a function that return the existing Books sorted by gender or author
+
+exports.getBookByGenderOrAuthor = async (req, res) => {
+  if (checkAuth) {
+    try {
+    } catch (err) {
+      console.log(err);
+    }
   }
 };
