@@ -1,21 +1,71 @@
-//  CREATE and ADD new books to the system ( user is admin or librarian)
-const { db } = require("../models/StaffModel");
-const Staff = require("../models/StaffModel");
-exports.addBook = (req, res) => {
-  if (Staff.role == "librarian" || Staff.role == "admin") {
-    const { ISBN, BookName, Author, Gender, Status, Date } = req.body;
-    // add to db
+var BookModel = require("../models/BookModel");
+var jwt = require("jsonwebtoken");
+
+// check if staff has jwt token
+const checkAuth = (req, res) => {
+  try {
+    const token = req.headers.authorization.split(" ")[1];
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    req.userData = decoded;
+    return true;
+    // next();
+  } catch (err) {
+    console.log(err);
+    return false;
+  }
+};
+// add book
+exports.addBook = async (req, res) => {
+  if (checkAuth(req, res)) {
     try {
-      db.Book.insertOne({
-        ISBN: ISBN,
-        BookName: BookName,
-        Author: Author,
-        Gender: Gender,
-        Status: Status,
-        Date: Date,
+      // check if book already exists
+      const book = await BookModel.findOne({
+        Title: req.body.Title,
       });
+      if (book) {
+        return res.status(400).json({
+          message: "book already exists",
+        });
+      } else {
+        // create new book with req.body using mongoose create
+        const newBook = await BookModel.create(req.body);
+        return res.status(201).json({
+          message: "book added successfully",
+          data: newBook,
+        });
+      }
     } catch (err) {
       console.log(err);
     }
+  } else {
+    return res.status(401).json({
+      message: "you are not authorized to add a book",
+    });
+  }
+};
+// delete book if user authorized
+exports.deleteBook = async (req, res) => {
+  if (checkAuth(req, res)) {
+    try {
+      const book = await BookModel.findById(req.params.id);
+      if (!book) {
+        return res.status(404).json({
+          message: "book not found",
+        });
+      }
+      await BookModel.findByIdAndDelete(req.params.id);
+      return res.status(200).json({
+        message: "book deleted successfully",
+      });
+    } catch (err) {
+      console.log(err);
+      res.status(500).json({
+        message: "server error",
+      });
+    }
+  } else {
+    return res.status(401).json({
+      message: "you are not authorized to delete a book",
+    });
   }
 };

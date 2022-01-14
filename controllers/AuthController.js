@@ -1,5 +1,4 @@
 const jwt = require("jsonwebtoken");
-const validator = require("validator");
 const Staff = require("../models/StaffModel");
 
 // create jwt token by signing it with sign fct and encoding it with the jwt secret
@@ -27,14 +26,15 @@ const createSendToken = (Staff, statusCode, res) => {
 exports.login = async (req, res) => {
   try {
     const { FirstName, Role } = req.body;
-    const staff = await Staff.findOne({ FirstName });
+    const staff = await Staff.findOne({ Role:Role });
+    console.log(staff)
     if (!staff) {
       return res
         .status(404)
-        .json({ message: "no staff is found with these credentials" });
+        .json({staff, message: "no staff is found with these credentials" });
     }
     createSendToken(staff,200,res)
-    
+
   } catch (err) {
     console.log(err.message);
   }
