@@ -1,4 +1,5 @@
 const mongoose = require("mongoose");
+
 const CustomerSchema = new mongoose.Schema({
   FirstName: {
     type: String,
@@ -18,6 +19,7 @@ const CustomerSchema = new mongoose.Schema({
   Email: {
     type: String,
     required: true,
+    unique: true,
     trim: true,
   },
   BorrowedBookList: {
@@ -27,4 +29,6 @@ const CustomerSchema = new mongoose.Schema({
     type: Date,
   },
 });
+
+
 module.exports = mongoose.model("Customer", CustomerSchema);

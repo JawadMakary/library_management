@@ -1,0 +1,31 @@
+const StaffModel = require("./models/StaffModel");
+
+
+StaffModel.create({
+    FirstName: "Elie",
+      LastName: "Saade",
+      Gender: "Male",
+      DateOfBirth: "12/1/2001",
+      role: "librarian-assistant",
+      salary: 1000,
+})
+
+StaffModel.create({
+    FirstName: "Georges",
+      LastName: "Saade",
+      Gender: "male",
+      DateOfBirth: "12/1/2201",
+      role: "librarian-assistant",
+      salary: 15000,
+  })
+
+
+  StaffModel.create({
+    FirstName: "Nathalie",
+      LastName: "Achkar",
+      Gender: "male",
+      DateOfBirth: "12/1/2201",
+      role: "librarian",
+      salary: 15000,
+  })
+  

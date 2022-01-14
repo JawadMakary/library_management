@@ -1,4 +1,4 @@
-db.Books.insertOne({
+db.books.insertOne({
   "BookId":1,
   "ISBN":2,
   "BookName":"first book",
@@ -17,13 +17,22 @@ db.Staff.insertOne({
 "Role":"admin",
 "salary":10000
 })
-db.Customers.insertOne({
+db.customers.insertOne({
  "FirstName":"jad",
 "LastName":"makary",
 "PhoneNumber":"+96176348376",
 "Email":"jad@gmail.com",
 "BorrowedBookList":"first book"
 })
+
+db.customers.insertOne({
+ "FirstName":"Elie",
+"LastName":"Saade",
+"PhoneNumber":"+96171968587",
+"Email":"elie.saade432@gmail.com",
+"BorrowedBookList":"1"
+})
+
 db.BorrowedBooks.insertOne({
 "borrowerID":1,
 "borrowedBookName":"first book",

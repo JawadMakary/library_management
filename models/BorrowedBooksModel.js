@@ -1,9 +1,11 @@
 const mongoose = require("mongoose");
+
+
 const BorrowedBooksSchema = new mongoose.Schema(
   {
-    borrowedID: {
-      type: Number,
-      unique: true,
+    borrowerID: {
+      type: String,
+      required: true,
     },
     BorrowedBookName: {
       type: String,
@@ -11,11 +13,13 @@ const BorrowedBooksSchema = new mongoose.Schema(
       trim: true,
     },
     borrowedBookID: {
-      type: Number,
-      unique: false,
+      type: String,
+      required: true,
+
     },
     borrowedBookDate: {
       type: Date,
+      default: new Date(),
     },
   },
   { timestamps: true }

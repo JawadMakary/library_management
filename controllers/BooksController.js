@@ -1,36 +1,30 @@
 var BookModel = require("../models/BookModel");
-var jwt = require("jsonwebtoken");
+const checkAuth = require("../middleware/checkAuth.js");
 
-// check if staff has jwt token
-const checkAuth = (req, res) => {
-  try {
-    const token = req.headers.authorization.split(" ")[1];
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    req.userData = decoded;
-    return true;
-    // next();
-  } catch (err) {
-    console.log(err);
-    return false;
-  }
-};
+
 // add book
 exports.addBook = async (req, res) => {
-  if (checkAuth(req, res)) {
+
+ 
+  const staffData = checkAuth(req);
+
+  if (staffData != undefined && staffData.data.role != "librarian-assistant") {
     try {
       // check if book already exists
       const book = await BookModel.findOne({
-        Title: req.body.Title,
+        BookName: req.body.BookName,
       });
       if (book) {
+
         return res.status(400).json({
-          message: "book already exists",
+          message: "Book already exists",
         });
+
       } else {
         // create new book with req.body using mongoose create
         const newBook = await BookModel.create(req.body);
         return res.status(201).json({
-          message: "book added successfully",
+          message: "Book added successfully",
           data: newBook,
         });
       }
@@ -39,15 +33,20 @@ exports.addBook = async (req, res) => {
     }
   } else {
     return res.status(401).json({
-      message: "you are not authorized to add a book",
+      message: "You are not authorized to add a book",
     });
   }
 };
 // delete book if user authorized
 exports.deleteBook = async (req, res) => {
-  if (checkAuth(req, res)) {
+
+  const staffData = checkAuth(req);
+
+  if (staffData != undefined && staffData.data.role == "admin") {
+    console.log(staffData);
     try {
       const book = await BookModel.findById(req.params.id);
+
       if (!book) {
         return res.status(404).json({
           message: "book not found",
@@ -65,13 +64,16 @@ exports.deleteBook = async (req, res) => {
     }
   } else {
     return res.status(401).json({
-      message: "you are not authorized to delete a book",
+      message: "You are not authorized to delete a book",
     });
   }
 };
 // UPDATE book status if user authorized
 exports.updateBook = async (req, res) => {
-  if (checkAuth(req, res)) {
+
+  const staffData = checkAuth(req);
+
+  if (staffData != undefined) {
     try {
       const book = await BookModel.findById(req.params.id);
       if (!book) {
@@ -96,8 +98,11 @@ exports.updateBook = async (req, res) => {
   }
 };
 
+//Search by Book Name or ISSN
 exports.searchByNameOrISSN = async (req, res) => {
-  if (checkAuth(req, res)) {
+  const staffData = checkAuth(req);
+
+  if (staffData != undefined) {
     try {
       const book = await BookModel.find({
         $or: [{ BookName: req.body.BookName }, { ISSN: req.body.ISSN }],
@@ -124,10 +129,11 @@ exports.searchByNameOrISSN = async (req, res) => {
   }
 };
 
-// • Create a function that return the existing Books sorted by gender or author
-
+//Create a function that return the existing Books sorted by gender or author
 exports.getBookByGenderOrAuthor = async (req, res) => {
-  if (checkAuth) {
+  const staffData = checkAuth(req);
+
+  if (staffData != undefined) {
     try {
     } catch (err) {
       console.log(err);

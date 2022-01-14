@@ -1,35 +1,26 @@
-var CustomerModel = require("../models/CustomerModel");
-var jwt = require("jsonwebtoken");
+const CustomerModel = require("../models/CustomerModel");
+const checkAuth = require("../middleware/checkAuth.js");
 
-// check if staff has jwt token
-const checkAuth = (req, res) => {
-  try {
-    const token = req.headers.authorization.split(" ")[1];
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    req.userData = decoded;
-    return true;
-    // next();
-  } catch (err) {
-    console.log(err);
-    return false;
-  }
-};
-// add book
+
+
+// add Customer
 exports.addCustomer = async (req, res) => {
-  if (checkAuth(req, res)) {
+  const staffData = checkAuth(req);
+
+  if (staffData != undefined && staffData.data.role == "admin") {
     try {
       const customer = await CustomerModel.findOne({
-        Name: req.body.Name,
+        Email: req.body.Email,
       });
       if (customer) {
         return res.status(400).json({
-          message: "customer already exists",
+          message: "Customer already exists",
         });
       } else {
         // create new book with req.body using mongoose create
         const newCustomer = await CustomerModel.create(req.body);
         return res.status(201).json({
-          message: "customer added successfully",
+          message: "Customer added successfully",
           data: newCustomer,
         });
       }
@@ -42,8 +33,14 @@ exports.addCustomer = async (req, res) => {
     });
   }
 };
+
+//Delete Customer
 exports.deleteCustomer = async (req, res) => {
-  if (checkAuth(req, res)) {
+
+  const staffData = checkAuth(req);
+
+  if (staffData != undefined && staffData.data.role == "admin") {
+
     try {
       const customer = await CustomerModel.findById(req.params.id);
       if (!customer) {
@@ -58,9 +55,13 @@ exports.deleteCustomer = async (req, res) => {
     } catch (err) {
       console.log(err);
     }
+
   } else {
+
     return res.status(401).json({
       message: "you are not authorized to delete a customer",
     });
+
+
   }
 };

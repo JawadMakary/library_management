@@ -1,44 +1,70 @@
 const BorrowedBooksModel = require("../models/BorrowedBooksModel");
-var jwt = require("jsonwebtoken");
 
-const checkAuth = (req, res) => {
-  try {
-    const token = req.headers.authorization.split(" ")[1];
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    req.userData = decoded;
-    return true;
-    // next();
-  } catch (err) {
-    console.log(err);
-    return false;
-  }
-};
-exports.addBorrowedBook = async (req, res) => {
-  if (checkAuth) {
+const BookModel = require("../models/BookModel");
+const CustomerModel = require("../models/CustomerModel");
+const checkAuth = require("../middleware/checkAuth.js");
+
+const sendEmail = require("../middleware/mailer.js");
+
+
+exports.borrowBook = async (req, res) => {
+  const staffData = checkAuth(req);
+  
+  if (staffData != undefined) {
+
     try {
+
+      const customer = await CustomerModel.findOne({
+        _id: req.body.borrowerID
+      });
+
+      if(!customer){
+        res.status(404).json({
+          message: "Customer not found"
+        })
+      }
+
+      const bookModel = await BookModel.findOne({
+        _id: req.body.borrowedBookID,
+        BookName: req.body.BorrowedBookName,
+      });
+      console.log(bookModel);
+      if(!bookModel){
+        res.status(404).json({
+          message: "Book not found"
+        })
+      }
+
       const borrowedBook = await BorrowedBooksModel.create(req.body);
+
+      //Add Borrowed Book to Customer
+      console.log(req.body.borrowedBookID,req.body.borrowerID);
+      await CustomerModel.findByIdAndUpdate(req.body.borrowerID, 
+        { $push: { BorrowedBookList: req.body.borrowedBookID }}
+        );
+
+      //Send Email
+      mailOptions = {
+        to: customer.Email,
+        subject: "Book Borrowed",
+        text: "You have borrowed a book from the library. Please return the book within 7 days."
+      }
+      sendEmail(mailOptions);
+      
+
       return res.status(201).json({
-        message: "borrowed book added successfully",
+        message: "Borrowed book added successfully",
         data: borrowedBook,
       });
+
+
+
     } catch (err) {
       console.log(err);
     }
-  }
-};
-exports.addBorrowedList = async (req, res) => {
-  if (checkAuth) {
-    try {
-      const borrowedList = await BorrowedBooksModel.create(req.body);
-      const customer = await CustomerModel.findById(req.params.id);
-      customer.BorrowedBookList.push(borrowedList);
-      await customer.save();
-      return res.status(201).json({
-        message: "borrowed book added successfully",
-        data: borrowedList,
-      });
-    } catch (err) {
-      console.log(err);
-    }
+  }else{
+    return res.status(401).json({
+      message: "You need to be logged in to add a borrow a book",
+    });
   }
 };

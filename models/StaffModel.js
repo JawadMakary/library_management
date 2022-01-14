@@ -1,9 +1,11 @@
 const mongoose = require("mongoose");
+
 const StaffSchema = new mongoose.Schema(
   {
     FirstName: {
       type: String,
       required: [true, "Please enter your first name"],
+      unique: true,
       trim: true,
     },
     LastName: {
@@ -13,7 +15,7 @@ const StaffSchema = new mongoose.Schema(
     },
     Gender: {
       type: String,
-      required: false,
+      enum: ["male", "female", "none"]
     },
     DateOfBirth: {
       type: Date,

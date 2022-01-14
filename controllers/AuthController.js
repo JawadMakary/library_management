@@ -3,8 +3,8 @@ const Staff = require("../models/StaffModel");
 
 // create jwt token by signing it with sign fct and encoding it with the jwt secret
 
-const signToken = (id) => {
-  return jwt.sign({ id }, process.env.JWT_SECRET, {
+const signToken = (data) => {
+  return jwt.sign({ data }, process.env.JWT_SECRET, {
     expiresIn: process.env.JWT_EXPIRES_IN,
   });
 };
@@ -13,7 +13,7 @@ const signToken = (id) => {
 // we can use it in other fcts
 const createSendToken = (Staff, statusCode, res) => {
   //mongoose create ._id automatically
-  const token = signToken(Staff._id);
+  const token = signToken(Staff);
   res.status(statusCode).json({
     status: "success",
     token,
@@ -25,14 +25,19 @@ const createSendToken = (Staff, statusCode, res) => {
 
 exports.login = async (req, res) => {
   try {
-    const { FirstName, Role } = req.body;
-    const staff = await Staff.findOne({ Role:Role });
-    console.log(staff)
+    //No need for other information in the req.body (Will make username unique)
+    //Or we will be needing a password
+    const { FirstName } = req.body;
+    const staff = await Staff.findOne({ 'FirstName': FirstName});
+
     if (!staff) {
+
       return res
         .status(404)
         .json({staff, message: "no staff is found with these credentials" });
+        
     }
+
     createSendToken(staff,200,res)
 
   } catch (err) {

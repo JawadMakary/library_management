@@ -1,4 +1,6 @@
 const mongoose = require("mongoose");
+
+
 const BookSchema = new mongoose.Schema({
   BookID: {
     type: Number,
@@ -26,10 +28,11 @@ const BookSchema = new mongoose.Schema({
   },
   Status: {
     type: String,
-    enum: ["Borrowed", "available"],
+    enum: ["Borrowed", "Available"],
   },
   Date: {
     type: Date,
+    default: new Date(),
   },
 });
 module.exports = mongoose.model("Book", BookSchema);
